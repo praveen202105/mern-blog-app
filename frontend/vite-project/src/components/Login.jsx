@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link } from "react-router-dom";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const Login = () => {
     const [email, setEmail] = useState();
@@ -14,14 +15,19 @@ const Login = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-          const response = await axios.post('http://localhost:5000/api/v1/user/login', { email, password});
-          console.log(response);
+          const response = await axios.post('http://localhost:5000/api/v1/user/login', { email, password},{ withCredentials: true } );
+          console.log(response.data);
           if(response.message === "Email already exists"){
             alert("E-mail already registered! Please Login to proceed.");
             navigate('/login');
         }
         else{
             alert("login successfully! .")
+            const cookieValue = response.headers['set-cookie'];
+            if (cookieValue) {
+                // Assuming the cookie value is a token
+                Cookies.set('token', cookieValue, { expires: 7 });
+            }
             navigate('/login');
         }
         }

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Link } from "react-router-dom";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 const Register = () => {
     const [fullName, setfullName] = useState();
@@ -37,14 +38,19 @@ const Register = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
-          const response = await axios.post('http://localhost:5000/api/v1/user/register', {fullName, email, password,confirmpassword});
+          const response = await axios.post('http://localhost:5000/api/v1/user/register', {fullName, email, password,confirmpassword},{ withCredentials: true });
           console.log(response);
           if(response.message === "Email already exists"){
             alert("E-mail already registered! Please Login to proceed.");
             navigate('/login');
         }
         else{
-            alert("Registered successfully! Please Login to proceed.")
+            alert("Registered successfully")
+            const cookieValue = response.headers['set-cookie'];
+            if (cookieValue) {
+                // Assuming the cookie value is a token
+                Cookies.set('token', cookieValue, { expires: 7 });
+            }
             navigate('/login');
         }
         }

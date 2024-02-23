@@ -1,9 +1,10 @@
 // import Home from './Home';
 // import Login from './Login';
-import GetPosts from './components/GetPosts.jsx';
+// import AllPost from './components/GetPosts.jsx';
 import Register from './components/Register.jsx';
 import Login from './components/Login.jsx';
 import {BrowserRouter, Routes, Route} from "react-router-dom";
+import AllPosts from './components/GetPosts.jsx';
 
 function App() {
 
@@ -14,7 +15,7 @@ function App() {
           <Route path="/" element ={<Register/>} />
           {/* <Route path="/register" element ={<Register/>} />  */}
           <Route path="/login" element ={<Login/>} /> 
-          <Route path="/home" element ={<GetPosts/>} /> 
+          <Route path="/post" element ={<AllPosts/>} /> 
         </Routes>
       </BrowserRouter>
     </div>

@@ -170,9 +170,10 @@ export const deletePostById = async (req, res, next) => {
   };
 
   export const likepost = async (req, res,next) =>{
+    console.log("called");
       const { token } = req.cookies;
       const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-      // console.log()
+      console.log(req.params.postid)
       const id=req.params.postid;
       const postdetails = await Post.findById(id);
       console.log(postdetails); 

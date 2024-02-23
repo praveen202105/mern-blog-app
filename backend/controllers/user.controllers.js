@@ -127,7 +127,7 @@ export const registerUser = asyncHandler(async (req, res, next) => {
   
     // Setting the token in the cookie with name token along with cookieOptions
     res.cookie('token', token, cookieOptions);
-  
+   console.log(req.headers)
     // If all good send the response to the frontend
     res.status(200).json({
       success: true,
