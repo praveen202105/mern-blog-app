@@ -5,11 +5,11 @@ import Register from './components/Register.jsx';
 import Login from './components/Login.jsx';
 import {BrowserRouter, Routes, Route} from "react-router-dom";
 import AllPosts from './components/GetPosts.jsx';
-
+// import { idContext } from './context-api/id.context.js';
 function App() {
 
   return (
-    <div style={{marginTop : '-3.5rem'}}>
+    <div  style={{marginTop : '-3.5rem'}}>
       <BrowserRouter >
         <Routes>
           <Route path="/" element ={<Register/>} />

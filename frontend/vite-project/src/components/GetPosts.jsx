@@ -1,5 +1,13 @@
 import  { useState, useEffect } from 'react';
 import axios from 'axios';
+import { CookieJar } from 'tough-cookie';
+// import Cookies from 'js-cookie';
+// Create a new cookie jar instance
+const cookieJar = new CookieJar();
+
+// Configure axios to use cookie jar support
+axios.defaults.jar = cookieJar;
+axios.defaults.withCredentials = true;
 
 const AllPosts = () => {
   const [posts, setPosts] = useState([]);
@@ -7,6 +15,7 @@ const AllPosts = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
+        
         const response = await axios.get('http://localhost:5000/api/v1/post/allposts');
         console.log(response.data.posts)
         setPosts(response.data.posts); // Assuming response.data is an array of posts
@@ -19,12 +28,19 @@ const AllPosts = () => {
   }, []);
 
   const handleLike = async (postId) => {
+   
     try {
-        await axios.get(`http://localhost:5000/api/v1/post/likepost/${postId}`)
+        // const token = localhost.Cookies.get('token');
+        // console.log(token);
+ 
+         // Make the request with token included in headers
+         await axios.get(`http://localhost:5000/api/v1/post/likepost/${postId}`)
+        // await axios.get(`http://localhost:5000/api/v1/post/likepost/${postId}`)
       // Your logic to like a post, for example:
       // await axios.post(`http://localhost:5000/api/v1/post/${postId}/like`);
       // Then update the state to reflect the liked post
      // setPosts(prevPosts => prevPosts.map(post => post._id === postId ? { ...post, LikesCount: post.LikesCount + 1 } : post));
+     console.log("over")
     } catch (error) {
       console.error('Error liking post:', error);
     }

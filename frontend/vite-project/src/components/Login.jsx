@@ -4,40 +4,49 @@ import { Link } from "react-router-dom";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+// import { useContext } from 'react';
+// import { idContext } from '../context-api/id.context';
 
 const Login = () => {
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
     const navigate = useNavigate();
-
-    
-    
+    // const { setId } = useContext(idContext); 
+    // const { Id } = useContext(idContext); 
+    // const id=useContext(idContext);
     const handleSubmit = async (event) => {
         event.preventDefault();
         try {
           const response = await axios.post('http://localhost:5000/api/v1/user/login', { email, password},{ withCredentials: true } );
-          console.log(response.data);
-          if(response.message === "Email already exists"){
-            alert("E-mail already registered! Please Login to proceed.");
-            navigate('/login');
-        }
-        else{
+          const token = response.data.token;
+
+        // Save the token in a cookie
+        Cookies.set('token', token, { expires: 7 }); // Expires in 7 days
+        
+        // console.log(id);
+        //   console.log("id: "+Id);
+            // navigate('/post');
+            // console.log(response.data.user._id)
             alert("login successfully! .")
-            const cookieValue = response.headers['set-cookie'];
-            if (cookieValue) {
-                // Assuming the cookie value is a token
-                Cookies.set('token', cookieValue, { expires: 7 });
-            }
-            navigate('/login');
+         
+            // const cookieValue = response.headers['set-cookie'];
+         
+            // if (cookieValue) {
+            //     // Assuming the cookie value is a token
+            //     Cookies.set('token', cookieValue, { expires: 7 });
+            // }  
+           
+             navigate('/post');
         }
-        }
-         catch (err) {
+        
+        catch (err) {
             alert(err.response.data.message);
-          console.log(err);
+         console.log(err);
         }
       
         
     }
+    
 
 
     return (
@@ -85,4 +94,4 @@ const Login = () => {
     )
 }
 
-export default Login
+export default Login;

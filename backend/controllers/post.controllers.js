@@ -170,13 +170,13 @@ export const deletePostById = async (req, res, next) => {
   };
 
   export const likepost = async (req, res,next) =>{
-    console.log("called");
+    // console.log("called");
       const { token } = req.cookies;
       const decoded = await jwt.verify(token, process.env.JWT_SECRET);
       console.log(req.params.postid)
       const id=req.params.postid;
       const postdetails = await Post.findById(id);
-      console.log(postdetails); 
+      // console.log(postdetails); 
       if (!postdetails) {
         return next(new AppError('post with given id does not exist.', 404));
       }
