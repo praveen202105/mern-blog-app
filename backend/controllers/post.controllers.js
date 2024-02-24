@@ -221,7 +221,7 @@ export const deletePostById = async (req, res, next) => {
      console.log(postdetails);
      
      postdetails.Comments.push({
-      commentorId:userid,
+      commenterId:userid,
       description:req.body.comment
      });
    

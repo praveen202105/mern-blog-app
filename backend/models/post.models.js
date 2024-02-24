@@ -1,5 +1,36 @@
 import { model, Schema } from 'mongoose';
+const replySchema = new Schema({
+  commenterId: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
+  }
+}, { _id: false });
 
+const commentSchema = new Schema({
+  commenterId: {
+    type: String,
+    
+  },
+  description: {
+    type: String,
+   
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now
+  },
+  replies: [replySchema]
+}, 
+// { _id: false }
+);
 const postSchema = new Schema(
     {
         creatorId: {
@@ -30,9 +61,7 @@ const postSchema = new Schema(
       type:Number,
       default:0,
     },
-    Comments:{
-     type:Array,
-    },     
+    Comments:[commentSchema],     
 
   
 },{
