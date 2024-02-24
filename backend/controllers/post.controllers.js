@@ -187,9 +187,9 @@ export const deletePostById = async (req, res, next) => {
       
       const userid=decoded.id;
 
-      if(postdetails.Likes.includes(userid)) {
-        return next(new AppError("you already likes this post", 401));
-      }
+      // if(postdetails.Likes.includes(userid)) {
+      //   return next(new AppError("you already likes this post", 401));
+      // }
     
      
       postdetails.Likes.push(userid);
@@ -222,7 +222,7 @@ export const deletePostById = async (req, res, next) => {
      
      postdetails.Comments.push({
       commentorId:userid,
-      description:req.body.description
+      description:req.body.comment
      });
    
       await postdetails.save();
