@@ -43,6 +43,20 @@ const AllPosts = () => {
       console.error('Error liking post:', error);
     }
   };
+  const handleDelete = async (postId) => {
+   
+    try {
+       
+         await axios.delete(`http://localhost:5000/api/v1/post/deletepost/${postId}`)
+         setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
+      
+         console.log("Post deleted successfully");
+    
+    } catch (error) {
+      
+      console.error('Error deleting post:', error);
+    }
+  };
   
   
   return (
@@ -60,6 +74,7 @@ const AllPosts = () => {
           <button onClick={() => handleLike(post._id)}>Like</button>
        
           <span>Likes: {post.LikesCount}</span>
+          <button onClick={() => handleDelete(post._id)}>Delete</button>
           <Comments comments={post.Comments} id={post._id} setpost={setPosts} />
           
          {/* <h2>{post.Comments[0]}</h2> */}
