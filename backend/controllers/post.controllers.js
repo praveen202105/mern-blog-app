@@ -3,7 +3,7 @@ import AppError from "../utils/AppError.js";
 import cloudinary from "cloudinary"
 import fs from 'fs/promises';
 import jwt from 'jsonwebtoken';
-
+import mongoose from "mongoose";
 
 export const createPost = async(req, res,next) =>{
   
@@ -218,12 +218,12 @@ export const deletePostById = async (req, res, next) => {
       }
       
       const userid=decoded.id;
-     console.log(postdetails);
-     
-     postdetails.Comments.push({
-      commenterId:userid,
-      description:req.body.comment
-     });
+     console.log(userid);
+     const comment = {
+      commenterId: userid, // Include the commenterId field
+      description: req.body.comment
+    };
+     postdetails.Comments.push(comment);
    
       await postdetails.save();
       res.status(200).json({
@@ -231,3 +231,98 @@ export const deletePostById = async (req, res, next) => {
           postdetails,
         });
       }
+
+      
+    //   export const createreply = async (req, res) => {
+    //     const { postId, commentId } = req.params;
+    //     console.log(postId);
+    //     const { description } = req.body;
+    //     const { token } = req.cookies;
+    //     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+    //     const commenterId=decoded.id;
+    //     try {
+    //       // Find the post by ID
+    //       const post = await Post.findById(postId);
+    //       if (!post) {
+    //         return res.status(404).json({ error: 'Post not found' });
+    //       }
+          
+    //       console.log(post);
+    //        // Find the comment within the post
+    //        const comment = post.Comments.find(comment => String(comment._id) === commentId);
+
+    //        if (comment) {
+    //          console.log('Found comment:', comment);
+    //        } else {
+    //          console.log('Comment not found');
+    //        }
+    //       //  const comment = post.Comments.find(comment => comment._id === commentId);
+    //       //  if (!comment) {
+    //       //    return res.status(404).json({ error: 'Comment not found' });
+    //       //  }
+  
+    // const reply = {
+    //   commenterId: commenterId, // Include the commenterId field
+    //   description: description
+    // };
+
+    // // Add the reply to the comment's replies array
+    // comment.replies.push(reply);
+    //       // Save the post
+    //       await post.save();
+      
+    //       res.status(201).json({ message: 'Reply added successfully', comment });
+    //     } catch (error) {
+    //       console.error(error);
+    //       res.status(500).json({ error: 'Server error hai' });
+    //     }
+    //   };
+
+
+    export const createReply = async (req, res) => {
+      try {
+        // Validation checks to prevent errors:
+        if (!req.params.postId || !req.params.commentId) {
+          return res.status(400).json({ error: 'Missing postId or commentId' });
+        }
+    
+        const postId = req.params.postId;
+        const commentId = req.params.commentId;
+        const { description } = req.body;
+    
+        // Ensure valid ObjectId for both `postId` and `commentId`:
+        const isValidPostId = mongoose.Types.ObjectId.isValid(postId);
+        const isValidCommentId = mongoose.Types.ObjectId.isValid(commentId);
+    
+        if (!isValidPostId || !isValidCommentId) {
+          return res.status(400).json({ error: 'Invalid postId or commentId' });
+        }
+    
+        // Handle authentication and authorization (use your preferred method):
+        // ...
+    
+        // Find the post and comment within the post:
+        const post = await Post.findById(postId);
+        const comment = post.Comments.id(commentId);
+    
+        if (!post || !comment) {
+          return res.status(404).json({ error: 'Post or comment not found' });
+        }
+    
+        // Create the reply with a valid ObjectId for `commenterId`:
+        const reply = {
+          commenterId: "123", // Replace with your user ID getter
+          description: description
+        };
+    
+        // Add the reply to the comment's replies array:
+        comment.replies.push(reply);
+    
+        // Save the post and return the updated comment with the new reply:
+        await post.save();
+        return res.status(201).json({ message: 'Reply added successfully', comment });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Server error' });
+      }
+    };
