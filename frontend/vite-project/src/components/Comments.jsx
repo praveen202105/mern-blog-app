@@ -13,7 +13,7 @@ const Comments = ({ comments, id,setpost}) => {
        await axios.post(`http://localhost:5000/api/v1/post/comment/${id}`, { comment });
       // Create a new comment object
       const newComment = {
-        commentorId: id,
+        commenterId: id,
         description: comment
       };
 
@@ -43,7 +43,7 @@ const Comments = ({ comments, id,setpost}) => {
       <button onClick={handleComment} className="btn btn-primary">Add comment</button>
       {comments.map((comment, index) => (
         <div key={index}>
-          <p><strong>Commentor ID:</strong> {comment.commentorId}</p>
+          <p><strong>Commentor ID:</strong> {comment.commenterId}</p>
           <p><strong>Description:</strong> {comment.description}</p>
         </div>
       ))}

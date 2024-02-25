@@ -232,52 +232,6 @@ export const deletePostById = async (req, res, next) => {
         });
       }
 
-      
-    //   export const createreply = async (req, res) => {
-    //     const { postId, commentId } = req.params;
-    //     console.log(postId);
-    //     const { description } = req.body;
-    //     const { token } = req.cookies;
-    //     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-    //     const commenterId=decoded.id;
-    //     try {
-    //       // Find the post by ID
-    //       const post = await Post.findById(postId);
-    //       if (!post) {
-    //         return res.status(404).json({ error: 'Post not found' });
-    //       }
-          
-    //       console.log(post);
-    //        // Find the comment within the post
-    //        const comment = post.Comments.find(comment => String(comment._id) === commentId);
-
-    //        if (comment) {
-    //          console.log('Found comment:', comment);
-    //        } else {
-    //          console.log('Comment not found');
-    //        }
-    //       //  const comment = post.Comments.find(comment => comment._id === commentId);
-    //       //  if (!comment) {
-    //       //    return res.status(404).json({ error: 'Comment not found' });
-    //       //  }
-  
-    // const reply = {
-    //   commenterId: commenterId, // Include the commenterId field
-    //   description: description
-    // };
-
-    // // Add the reply to the comment's replies array
-    // comment.replies.push(reply);
-    //       // Save the post
-    //       await post.save();
-      
-    //       res.status(201).json({ message: 'Reply added successfully', comment });
-    //     } catch (error) {
-    //       console.error(error);
-    //       res.status(500).json({ error: 'Server error hai' });
-    //     }
-    //   };
-
 
     export const createReply = async (req, res) => {
       try {
@@ -285,7 +239,8 @@ export const deletePostById = async (req, res, next) => {
         if (!req.params.postId || !req.params.commentId) {
           return res.status(400).json({ error: 'Missing postId or commentId' });
         }
-    
+        const { token } = req.cookies;
+      const decoded = await jwt.verify(token, process.env.JWT_SECRET);
         const postId = req.params.postId;
         const commentId = req.params.commentId;
         const { description } = req.body;
@@ -308,10 +263,15 @@ export const deletePostById = async (req, res, next) => {
         if (!post || !comment) {
           return res.status(404).json({ error: 'Post or comment not found' });
         }
-    
+         
+        if (!decoded) {
+          return next(new AppError("Unauthorized, please login to continue", 401));
+        }
+        
+        const userid=decoded.id;
         // Create the reply with a valid ObjectId for `commenterId`:
         const reply = {
-          commenterId: "123", // Replace with your user ID getter
+          commenterId: userid ,// Replace with your user ID getter
           description: description
         };
     

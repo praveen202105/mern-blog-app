@@ -13,6 +13,8 @@ axios.defaults.withCredentials = true;
 
 const AllPosts = () => {
   const [posts, setPosts] = useState([]);
+  const [editedPostId, setEditedPostId] = useState(null);
+  const [editedPostContent, setEditedPostContent] = useState('');
 
 
   useEffect(() => {
@@ -57,13 +59,37 @@ const AllPosts = () => {
       console.error('Error deleting post:', error);
     }
   };
-  
-  
+const handlePostEdit = async (postId) => {
+    setEditedPostId(postId);
+    const postToEdit = posts.find(post => post._id === postId);
+    console.log('Post to edit:', postToEdit)
+    setEditedPostContent(postToEdit.content);
+}
+const handleSubmitEdit = async () => {
+    try {
+      await axios.put(`http://localhost:5000/api/v1/post/editpost/${editedPostId}`, {
+        content: editedPostContent
+      });
+      const updatedPosts = posts.map(post =>
+        post._id === editedPostId ? { ...post, content: editedPostContent } : post
+      );
+      setPosts(updatedPosts);
+      setEditedPostId(null);
+      setEditedPostContent('');
+      console.log("Post edited successfully");
+    } catch (error) {
+      console.error('Error editing post:', error);
+    }
+  };
+  const handleCancelEdit = () => {
+    setEditedPostId(null);
+    setEditedPostContent('');
+  };
   return (
     <>
-    <div>
+
         <CreatePost setallpost={setPosts} />
-    </div>
+
     <div>
       <h2>All Posts</h2>
       {posts.map(post => (
@@ -75,12 +101,23 @@ const AllPosts = () => {
        
           <span>Likes: {post.LikesCount}</span>
           <button onClick={() => handleDelete(post._id)}>Delete</button>
+          <button onClick={() => handlePostEdit(post._id)}>Edit</button>
+          {editedPostId && (
+        <div>
+          <input type="text" value={editedPostContent} onChange={(e) => setEditedPostContent(e.target.value)} />
+          
+          <button onClick={handleSubmitEdit}>Submit update post</button>
+          <button onClick={handleCancelEdit}>Cancel</button>
+        </div>
+      )}
           <Comments comments={post.Comments} id={post._id} setpost={setPosts} />
           
          {/* <h2>{post.Comments[0]}</h2> */}
         </div>
+         
       ))}
     </div>
+    
     </>
   );
 };
