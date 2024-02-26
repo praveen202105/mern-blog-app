@@ -1,72 +1,83 @@
 import Post from "../models/post.models.js";
 import AppError from "../utils/AppError.js";
 import cloudinary from "cloudinary"
-import fs from 'fs/promises';
+import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import mongoose from "mongoose";
+import asyncHandler from "../middlewares/asyncHandler.middleware.js"
+import imagekit from "../configs/imagekit.js";
+import axios from "axios";
 
-export const createPost = async(req, res,next) =>{
+axios.defaults.timeout = 500;
+
+export const createPost = asyncHandler(async(req, res,next) =>{
+
+  //  console.log(req.file);
+  //  console.log(req.body.content);
   
-//  console.log(req.file);
-//  console.log(req.body.content);
- 
-
-  const post = await Post.create({
-    content:req.body.content,
-    media: {}
-});
-if (!req.body.content && !req.file) {
-    return next(new AppError('content or media are required', 400));
-  }
-
-    
-      if (req.file) {
-        try {
-          const result = await cloudinary.v2.uploader.upload(req.file.path, {
-            folder: 'post', // Save files in a folder named lms
-           width: 250,
-            height: 250,
-           // gravity: 'faces', // This option tells cloudinary to center the image around detected faces (if any) after cropping or resizing the original image
-            crop: 'fill',
-          });
-    
-          // If success
-          if (result) {
-            // Set the public_id and secure_url in DB
-            post.media.public_id = result.public_id;
-            post.media.secure_url = result.secure_url;
-    
-            // After successful upload remove the file from local storage
-            fs.rm(`uploads/${req.file.filename}`);
-          }
-        } catch (error) {
-          return next(
-            new AppError(error || 'File not uploaded, please try again', 400)
-          );
-        }
+  
+    const post = await Post.create({
+      content:req.body.content,
+      media: {
+        // "public_id":"123",
+        // "secure_url":"1234"
       }
-    // Decoding the token using jwt package verify method
-   
-const { token } = req.cookies;
-const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-    // If no decode send the message unauthorized
-    if (!decoded) {
-      return next(new AppError("Unauthorized, please login to continue", 401));
+  });
+  if (!req.body.content && !req.file) {
+      return next(new AppError('content or media are required', 400));
     }
   
-    console.log(decoded);
-    post.creatorId = decoded.id;
   
-    // Save the user object
-    await post.save();
-    res.status(201).json({
-        success: true,
-        message: 'Post created successfully',
-        post,
-      });
-
-}
-
+        if (req.file) {
+          try {
+            const fileStream = fs.createReadStream(req.file.path);
+            const result = await imagekit.upload({
+              file: fileStream,
+              fileName: req.file.filename,
+              folder: '/post', // Save files in a folder named post
+              tags: ['post'],
+              isPrivateFile: false, // Change to true if you want the file to be private
+            });
+          console.log(result);
+            // If success
+            if (result ) {
+              // Set the public_id and secure_url in DB
+              post.media.public_id = result.fileId;
+              post.media.secure_url = result.thumbnailUrl;
+          
+              // After successful upload remove the file from local storage
+              fs.rmSync(req.file.path);
+            }
+          } catch (error) {
+            console.log(error)
+            return next(
+            
+              new AppError(error || 'File not uploaded, please try again', 400)
+            );
+          }
+        }
+      // Decoding the token using jwt package verify method
+  
+  const { token } = req.cookies;
+  const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+      // If no decode send the message unauthorized
+      if (!decoded) {
+        return next(new AppError("Unauthorized, please login to continue", 401));
+      }
+  
+      console.log(decoded);
+      post.creatorId = decoded.id;
+  
+      // Save the user object
+      await post.save();
+      res.status(201).json({
+          success: true,
+          message: 'Post created successfully',
+          post,
+        });
+  
+  });
+  
 export const deletePostById = async (req, res, next) => {
     // Extracting id from the request parameters
     const { id } = req.params;
@@ -121,39 +132,43 @@ export const deletePostById = async (req, res, next) => {
       return next(new AppError('Invalid post id or post not found.', 400));
     }
     if (req.file) {
-        try {
-          const result = await cloudinary.v2.uploader.upload(req.file.path, {
-            folder: 'post', // Save files in a folder named lms
-           width: 250,
-            height: 250,
-           // gravity: 'faces', // This option tells cloudinary to center the image around detected faces (if any) after cropping or resizing the original image
-            crop: 'fill',
-          });
-    
-          // If success
-          if (result) {
-            // Set the public_id and secure_url in DB
-            post.media.public_id = result.public_id;
-            post.media.secure_url = result.secure_url;
-    
-            // After successful upload remove the file from local storage
-            fs.rm(`uploads/${req.file.filename}`);
-          }
-        } catch (error) {
-          return next(
-            new AppError(error || 'File not uploaded, please try again', 400)
-          );
+      try {
+        const fileStream = fs.createReadStream(req.file.path);
+        const result = await imagekit.upload({
+          file: fileStream,
+          fileName: req.file.filename,
+          folder: '/post', // Save files in a folder named post
+          tags: ['post'],
+          isPrivateFile: false, // Change to true if you want the file to be private
+        });
+      console.log(result);
+        // If success
+        if (result ) {
+          // Set the public_id and secure_url in DB
+          post.media.public_id = result.fileId;
+          post.media.secure_url = result.thumbnailUrl;
+      
+          // After successful upload remove the file from local storage
+          fs.rmSync(req.file.path);
         }
+      } catch (error) {
+        console.log(error)
+        return next(
+        
+          new AppError(error || 'File not uploaded, please try again', 400)
+        );
       }
+    }
     
       
       // If all good store the id in req object, here we are modifying the request object and adding a custom field user in i
     // Save the user object
-    await post.save();
+    const updatedpost=await post.save();
     // Sending the response after success
     res.status(200).json({
       success: true,
-      message: 'Course updated successfully',
+      message: "post updated successfully",
+      post:updatedpost
     });
   };
   
@@ -235,53 +250,52 @@ export const deletePostById = async (req, res, next) => {
 
     export const createReply = async (req, res) => {
       try {
-        // Validation checks to prevent errors:
-        if (!req.params.postId || !req.params.commentId) {
-          return res.status(400).json({ error: 'Missing postId or commentId' });
-        }
-        const { token } = req.cookies;
-      const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-        const postId = req.params.postId;
-        const commentId = req.params.commentId;
+        const { postId, commentId } = req.params;
         const { description } = req.body;
     
-        // Ensure valid ObjectId for both `postId` and `commentId`:
-        const isValidPostId = mongoose.Types.ObjectId.isValid(postId);
-        const isValidCommentId = mongoose.Types.ObjectId.isValid(commentId);
-    
-        if (!isValidPostId || !isValidCommentId) {
-          return res.status(400).json({ error: 'Invalid postId or commentId' });
+        // Validate the postId and commentId
+        if (!postId || !commentId) {
+          return res.status(400).json({ error: 'Missing postId or commentId' });
         }
     
-        // Handle authentication and authorization (use your preferred method):
-        // ...
-    
-        // Find the post and comment within the post:
-        const post = await Post.findById(postId);
-        const comment = post.Comments.id(commentId);
-    
-        if (!post || !comment) {
-          return res.status(404).json({ error: 'Post or comment not found' });
+        // Validate and decode the JWT token
+        const token = req.cookies.token;
+        if (!token) {
+          throw new AppError('Unauthorized, please login to continue', 401);
         }
-         
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         if (!decoded) {
-          return next(new AppError("Unauthorized, please login to continue", 401));
+          throw new AppError('Unauthorized, please login to continue', 401);
         }
-        
-        const userid=decoded.id;
-        // Create the reply with a valid ObjectId for `commenterId`:
+    
+        // Find the post and its associated comment
+        const post = await Post.findById(postId);
+        if (!post) {
+          return res.status(404).json({ error: 'Post not found' });
+        }
+        console.log(post)
+        const comment = post.Comments.find(comment => comment._id.toString() === commentId);
+        console.log(comment);
+        if (!comment) {
+          return res.status(404).json({ error: 'Comment not found' });
+        }
+    
+        // Create the reply object
         const reply = {
-          commenterId: userid ,// Replace with your user ID getter
-          description: description
+          commenterId: decoded.id,
+          description: description,
+          parentId: commentId
         };
     
-        // Add the reply to the comment's replies array:
-        comment.replies.push(reply);
-    
-        // Save the post and return the updated comment with the new reply:
+        // Add the reply to the comment's replies array
+        // comment.push(reply);
+        post.Comments.push(reply);
+        // Save the post with the updated comment
         await post.save();
+    
+        // Return success response
         return res.status(201).json({ message: 'Reply added successfully', comment });
-      } catch (error) {
+      }  catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Server error' });
       }

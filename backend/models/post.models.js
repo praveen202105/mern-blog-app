@@ -1,20 +1,20 @@
 import { model, Schema } from 'mongoose';
 import mongoose from 'mongoose';
-const replySchema = new Schema({
-  commenterId: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  timestamp: {
-    type: Date,
-    default: Date.now,
-  },
+// const replySchema = new Schema({
+//   commenterId: {
+//     type: String,
+//     required: true,
+//   },
+//   description: {
+//     type: String,
+//     required: true,
+//   },
+//   timestamp: {
+//     type: Date,
+//     default: Date.now,
+//   },
    
-});
+// });
 
 const commentSchema = new Schema({
   commenterId: {
@@ -25,11 +25,13 @@ const commentSchema = new Schema({
     type: String,
     required: true,
   },
+  parentId:{
+    type:String,// Array of nested replies using the same schema
+  },
   timestamp: {
     type: Date,
     default: Date.now,
   },
-  replies: [replySchema], // Array of reply objects
 });
 
 const postSchema = new Schema({

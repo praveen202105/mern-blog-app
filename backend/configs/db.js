@@ -23,5 +23,7 @@ const connectToDB = async () => {
     process.exit(1);
   }
 };
-
+// console.log(process.env.PRIVATE_KEY)
 export default connectToDB;
+
+console.log("INSIDE DB "+process.env.PRIVATE_KEY)

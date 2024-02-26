@@ -2,6 +2,11 @@ import app from './app.js';
 import { v2 } from 'cloudinary';
 import connectToDB from './configs/db.js';
 
+
+
+
+import ImageKit from 'imagekit';
+
 const PORT = process.env.PORT || 5000;
 
 v2.config({
@@ -9,6 +14,7 @@ v2.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
+  // console.log(v2)
   
 app.listen(PORT, async () => {
   // Connect to DB

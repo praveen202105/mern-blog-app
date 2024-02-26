@@ -15,6 +15,7 @@ const AllPosts = () => {
   const [posts, setPosts] = useState([]);
   const [editedPostId, setEditedPostId] = useState(null);
   const [editedPostContent, setEditedPostContent] = useState('');
+  const [editedPostMedia, setEditedPostMedia] = useState('');
 
 
   useEffect(() => {
@@ -64,26 +65,39 @@ const handlePostEdit = async (postId) => {
     const postToEdit = posts.find(post => post._id === postId);
     console.log('Post to edit:', postToEdit)
     setEditedPostContent(postToEdit.content);
+
 }
 const handleSubmitEdit = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/v1/post/editpost/${editedPostId}`, {
-        content: editedPostContent
-      });
-      const updatedPosts = posts.map(post =>
-        post._id === editedPostId ? { ...post, content: editedPostContent } : post
-      );
-      setPosts(updatedPosts);
-      setEditedPostId(null);
-      setEditedPostContent('');
-      console.log("Post edited successfully");
-    } catch (error) {
-      console.error('Error editing post:', error);
-    }
+        const formData = new FormData();
+        formData.append('content', editedPostContent);
+        formData.append('media', editedPostMedia);
+        
+        const res=await axios.put(`http://localhost:5000/api/v1/post/editpost/${editedPostId}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        
+        const newmedia=res.data.post.media;
+        const updatedPosts = posts.map(post =>
+          post._id === editedPostId ? { ...post, content: editedPostContent, media: { 
+            public_id:newmedia.public_id,secure_url: newmedia.secure_url } } : post
+        );
+        console.log(updatedPosts);
+        setPosts(updatedPosts);
+        setEditedPostId(null);
+        setEditedPostContent('');
+        setEditedPostMedia('');
+        console.log("Post edited successfully");
+      } catch (error) {
+        console.error('Error editing post:', error);
+      }
   };
   const handleCancelEdit = () => {
     setEditedPostId(null);
     setEditedPostContent('');
+    setEditedPostMedia('');
   };
   return (
     <>
@@ -106,6 +120,10 @@ const handleSubmitEdit = async () => {
         <div>
           <input type="text" value={editedPostContent} onChange={(e) => setEditedPostContent(e.target.value)} />
           
+          <input type="file" onChange={(e) =>{
+console.log(e.target.files)
+           setEditedPostMedia(e.target.files[0])}} />
+         
           <button onClick={handleSubmitEdit}>Submit update post</button>
           <button onClick={handleCancelEdit}>Cancel</button>
         </div>
