@@ -32,7 +32,7 @@ const AllPosts = () => {
 
     fetchPosts();
   }, []);
-
+console.log(posts);
   const handleLike = async (postId) => {
    
     try {
@@ -120,12 +120,12 @@ const handleSubmitEdit = async () => {
         <div>
           <input type="text" value={editedPostContent} onChange={(e) => setEditedPostContent(e.target.value)} />
           
-          <input type="file" onChange={(e) =>{
-console.log(e.target.files)
-           setEditedPostMedia(e.target.files[0])}} />
+          <input type="file" onChange={(e) => setEditedPostMedia(e.target.files[0])} />
          
           <button onClick={handleSubmitEdit}>Submit update post</button>
           <button onClick={handleCancelEdit}>Cancel</button>
+          
+          
         </div>
       )}
           <Comments comments={post.Comments} id={post._id} setpost={setPosts} />
