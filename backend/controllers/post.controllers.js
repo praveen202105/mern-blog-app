@@ -102,16 +102,8 @@ export const deletePostById = async (req, res, next) => {
 
 
   export const updatepostById = async (req, res, next) => {
-    // Extracting the course id from the request params
     const { id } = req.params;
-//     const { content } = req.body;
-//   console.log(req.body.chunk_size);
-//   const c ={};
-//     if(Object.keys(req.body).length === 0) {
-//       return next(new AppError('fields are required', 400));
-//     }
-  
-    // Finding the course using the course id
+
     const post = await Post.findByIdAndUpdate(
       
       id,
@@ -220,10 +212,9 @@ export const deletePostById = async (req, res, next) => {
       export const createcomment = async(req,res,next)=>{
         const { token } = req.cookies;
       const decoded = await jwt.verify(token, process.env.JWT_SECRET);
-      // console.log()
       const id=req.params.postid;
       const postdetails = await Post.findById(id);
-      // console.log(postdetails); 
+      
       if (!postdetails) {
         return next(new AppError('post with given id does not exist.', 404));
       }
@@ -247,9 +238,109 @@ export const deletePostById = async (req, res, next) => {
         });
       }
 
+      export const editComment = async (req, res, next) => {
+        try {
+          const { postId, commentId } = req.params;
+          const { description } = req.body;
+      
+          // Validate the postId and commentId
+          if (!postId || !commentId) {
+            return res.status(400).json({ error: 'Missing postId or commentId' });
+          }
+      
+          // Validate and decode the JWT token
+          const token = req.cookies.token;
+          if (!token) {
+            throw new AppError('Unauthorized, please login to continue', 401);
+          }
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          if (!decoded) {
+            throw new AppError('Unauthorized, please login to continue', 401);
+          }
+      
+          // Find the post and its associated comment
+          const post = await Post.findById(postId);
+          if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+          }
+      
+          const comment = post.Comments.find(comment => comment._id.toString() === commentId);
+          if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+          }
+      
+          // Check if the user is authorized to edit the comment
+          if (comment.commenterId !== decoded.id) {
+            return res.status(403).json({ error: 'You are not authorized to edit this comment' });
+          }
+      
+          // Update the comment description
+          comment.description = description;
+      
+          // Save the post with the updated comment
+          await post.save();
+      
+          // Return success response
+          return res.status(200).json({ message: 'Comment edited successfully', post });
+        } catch (error) {
+          next(error); // Pass the error to the next middleware
+        }
+      };
+      
 
+
+      export const deletecomment = async (req, res, next) => {
+        try {
+          console.log("Delete comment called");
+      
+          // Authorization using JWT
+          const { token } = req.cookies;
+          const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+          if (!decoded) {
+            return next(new AppError("Unauthorized, please login to continue", 401));
+          }
+      
+          // Extract post and comment IDs from request parameters
+          const postId = req.params.postId;
+          const commentId = req.params.commentId;
+      
+          // Find the post by ID
+          const post = await Post.findById(postId);
+          if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+          }
+      
+          // Find the comment within the post's comments array
+          const commentIndex = post.Comments.findIndex(
+            (comment) => comment._id.toString() === commentId
+          );
+      
+          if (commentIndex === -1) {
+            return res.status(404).json({ error: 'Comment not found' });
+          }
+      
+          // // Remove the comment from the post's comments array
+          // post.Comments.splice(commentIndex, 1);
+      
+          post.Comments = post.Comments.filter(
+            (comment) => comment._id.toString() !== commentId && comment.parentId !== commentId
+          );
+          // Save the updated post document
+          await post.save();
+      
+          // Send successful response
+          res.status(200).json({
+            success: true,
+            message: 'Comment deleted successfully',
+            post: post,
+          });
+        } catch (error) {
+          next(error);
+        }
+      };
     export const createReply = async (req, res) => {
       try {
+        console.log("reply create called")
         const { postId, commentId } = req.params;
         const { description } = req.body;
     

@@ -27,19 +27,19 @@ const Reply = ({ comments, parentId }) => {
 
 const Comments = ({ comments, id, setpost }) => {
   const [commentText, setCommentText] = useState('');
+  const [editedCommentId, setEditedCommentId] = useState(null);
+  const [editedCommentDescription, setEditedCommentDescription] = useState('');
 
   const handleComment = async () => {
     try {
       const res=await axios.post(`http://localhost:5000/api/v1/post/comment/${id}`, { description: commentText });
-      // const newComment = { commenterId: id, description: commentText };
-      // console.log(res.data.postdetails.Comments);
-      const AllCommentsIncludingReply =res.data.postdetails.Comments;
-      // const onlycomments = AllCommentsIncludingReply.filter(comment => !comment.parentId );
-      // console.log(onlycomments)
-      const updatedComments = AllCommentsIncludingReply;
+      
+      
+      const updatedComments = res.data.postdetails.Comments;
       setpost(prevPosts =>
         prevPosts.map(post => (post._id === id ? { ...post, Comments: updatedComments } : post))
       );
+
       alert('Comment added successfully');
     } catch (err) {
       alert(err.response.data.message);
@@ -47,6 +47,36 @@ const Comments = ({ comments, id, setpost }) => {
     }
   };
 
+  const handleCommentEdit = async (commentId) => {
+    setEditedCommentId(commentId);
+    // const postToEdit = posts.find(post => post._id === postId);
+    // console.log('Post to edit:', postToEdit)
+    // setEditedPostContent(postToEdit.content);
+
+}
+const handleSubmitEdit = async (commentId) => {
+    try {
+      console.log(editedCommentId)
+      const res = await axios.put(`http://localhost:5000/api/v1/post/${id}/comment/${editedCommentId}`, { description: editedCommentDescription });
+      console.log(res);
+      const updatedComments = res.data.postdetails.Comments;
+      setpost(prevPosts =>
+        prevPosts.map(post => (post._id === id ? { ...post, Comments: updatedComments } : post))
+      );
+      setEditedCommentId(null); // Reset the editing state after successful edit
+      setEditedCommentDescription(''); // Clear the edited comment text
+      alert('Comment edited successfully');
+    } catch (err) {
+      alert(err.response.data.message);
+      console.error(err);
+    }
+
+}
+const handleCancelEdit = () => {
+  setEditedCommentId(null);
+  setEditedCommentDescription('');
+  // setEditedPostMedia('');
+};
   return (
     <div>
     <h3>Comments</h3>
@@ -67,6 +97,18 @@ const Comments = ({ comments, id, setpost }) => {
             <div>
               <p><strong>Commentor ID:</strong> {comment.commenterId}</p>
               <p><strong>Description:</strong> {comment.description}</p>
+              {/* <button onClick={() => handleDelete(post._id)}>Delete</button> */}
+              <button onClick={() => handleCommentEdit(comment._id)}>Edit</button>
+             {editedCommentId && (
+             <div>
+              <input type="text" value={editedCommentDescription} onChange={(e) => setEditedCommentDescription(e.target.value)} />
+          
+             
+              <button onClick={handleSubmitEdit}>Submit updated comment</button>
+            <button onClick={handleCancelEdit}>Cancel</button>
+          
+        </div>
+      )}
               {/* Pass comments with matching parent ID to Reply component */}
               <Reply comments={comments} parentId={comment._id} />
             </div>

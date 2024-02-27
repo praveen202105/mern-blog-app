@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {createPost,deletePostById,updatepostById,allpost,likepost,createcomment, createReply} from "../controllers/post.controllers.js";
+import {createPost,deletePostById,updatepostById,allpost,likepost,createcomment, createReply, deletecomment, editComment} from "../controllers/post.controllers.js";
 import upload from "../middlewares/multer.middleware.js"
 import { isLoggedIn } from "../middlewares/auth.middleware.js";
 // allpost,deletepost,editpost}
@@ -16,6 +16,10 @@ router.get('/likepost/:postid',isLoggedIn,likepost);
 // router.get('/likepost/:postid',likepost);
 
 router.post('/comment/:postid',isLoggedIn,createcomment);
+// router.post('/comment/:postid',isLoggedIn,deletecomment);
+
+router.delete('/:postId/comment/:commentId',isLoggedIn,deletecomment)
 router.post('/:postId/comment/:commentId',isLoggedIn,createReply)
+router.put('/:postId/comment/:commentId',isLoggedIn,editComment)
 
 export default router;

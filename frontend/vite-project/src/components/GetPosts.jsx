@@ -125,7 +125,6 @@ const handleSubmitEdit = async () => {
           <button onClick={handleSubmitEdit}>Submit update post</button>
           <button onClick={handleCancelEdit}>Cancel</button>
           
-          
         </div>
       )}
           <Comments comments={post.Comments} id={post._id} setpost={setPosts} />
