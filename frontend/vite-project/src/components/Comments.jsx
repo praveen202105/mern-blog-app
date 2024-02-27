@@ -76,6 +76,24 @@ const handleCancelEdit = () => {
   setEditedCommentDescription('');
   // setEditedPostMedia('');
 };
+
+const handleDelete =async() =>{
+  try {
+    // console.log(editedCommentId)
+    const res = await axios.delete(`http://localhost:5000/api/v1/post/${id}/comment/${editedCommentId}`, { description: editedCommentDescription });
+    console.log(res);
+    const updatedComments = res.data.post.Comments;
+    setpost(prevPosts =>
+      prevPosts.map(post => (post._id === id ? { ...post, Comments: updatedComments } : post))
+    );
+    setEditedCommentId(null); // Reset the editing state after successful edit
+    setEditedCommentDescription(''); // Clear the edited comment text
+    alert('Comment edited successfully');
+  } catch (err) {
+    alert(err.response.data.message);
+    console.error(err);
+  }
+};
   return (
     <div>
     <h3>Comments</h3>
@@ -105,7 +123,7 @@ const handleCancelEdit = () => {
              
               <button onClick={handleSubmitEdit}>Submit updated comment</button>
             <button onClick={handleCancelEdit}>Cancel</button>
-          
+            <button onClick={handleDelete}>Delete</button>
         </div>
       )}
               {/* Pass comments with matching parent ID to Reply component */}
