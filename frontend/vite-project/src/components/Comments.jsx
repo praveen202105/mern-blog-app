@@ -49,9 +49,8 @@ const Comments = ({ comments, id, setpost }) => {
 
   const handleCommentEdit = async (commentId) => {
     setEditedCommentId(commentId);
-    // const postToEdit = posts.find(post => post._id === postId);
-    // console.log('Post to edit:', postToEdit)
-    // setEditedPostContent(postToEdit.content);
+    const commentToEdit = comments.find(comment => comment._id === commentId);
+    setEditedCommentDescription(commentToEdit.description);
 
 }
 const handleSubmitEdit = async (commentId) => {
@@ -59,7 +58,7 @@ const handleSubmitEdit = async (commentId) => {
       console.log(editedCommentId)
       const res = await axios.put(`http://localhost:5000/api/v1/post/${id}/comment/${editedCommentId}`, { description: editedCommentDescription });
       console.log(res);
-      const updatedComments = res.data.postdetails.Comments;
+      const updatedComments = res.data.post.Comments;
       setpost(prevPosts =>
         prevPosts.map(post => (post._id === id ? { ...post, Comments: updatedComments } : post))
       );
@@ -99,7 +98,7 @@ const handleCancelEdit = () => {
               <p><strong>Description:</strong> {comment.description}</p>
               {/* <button onClick={() => handleDelete(post._id)}>Delete</button> */}
               <button onClick={() => handleCommentEdit(comment._id)}>Edit</button>
-             {editedCommentId && (
+             {editedCommentId === comment._id && (
              <div>
               <input type="text" value={editedCommentDescription} onChange={(e) => setEditedCommentDescription(e.target.value)} />
           
