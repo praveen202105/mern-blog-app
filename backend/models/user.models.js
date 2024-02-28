@@ -31,6 +31,12 @@ const userSchema = new Schema(
       minlength: [8, 'Password must be at least 8 characters'],
       select: false, // Will not select password upon looking up a document
     },
+    resetPasswordToken:{
+      type:String,
+    },
+    resetPasswordExpires:{
+      type:Date,
+    },
     
     avatar: {
       public_id: {

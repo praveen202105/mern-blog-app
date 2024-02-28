@@ -22,4 +22,5 @@ router.delete('/:postId/comment/:commentId',isLoggedIn,deletecomment)
 router.post('/:postId/comment/:commentId',isLoggedIn,createReply)
 router.put('/:postId/comment/:commentId',isLoggedIn,editComment)
 
+
 export default router;

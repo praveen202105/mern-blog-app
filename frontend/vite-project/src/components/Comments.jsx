@@ -88,7 +88,7 @@ const handleDelete =async() =>{
     );
     setEditedCommentId(null); // Reset the editing state after successful edit
     setEditedCommentDescription(''); // Clear the edited comment text
-    alert('Comment edited successfully');
+    alert('Comment deleted successfully');
   } catch (err) {
     alert(err.response.data.message);
     console.error(err);
@@ -107,7 +107,7 @@ const handleDelete =async() =>{
         required
       />
     </div>
-    <button onClick={handleComment} className="btn btn-primary mb-3">Add comment</button>
+    {commentText &&<button onClick={handleComment} className="btn btn-primary mb-3">Add comment</button>}
     {comments.map((comment, index) => (
         <div key={index} className="border p-3 mb-3">
           {!comment.parentId  && (
@@ -122,8 +122,8 @@ const handleDelete =async() =>{
           
              
               <button onClick={handleSubmitEdit}>Submit updated comment</button>
-            <button onClick={handleCancelEdit}>Cancel</button>
-            <button onClick={handleDelete}>Delete</button>
+              <button onClick={handleCancelEdit}>Cancel</button>
+              <button onClick={handleDelete}>Delete</button>
         </div>
       )}
               {/* Pass comments with matching parent ID to Reply component */}

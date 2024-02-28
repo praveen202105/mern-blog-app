@@ -86,8 +86,8 @@ const Login = () => {
                         <button type="Submit"  className="btn btn-primary">Login</button>
                     </form>
 
-                    <p className='container my-2'>forget Password</p>
-                    <Link to='/login' className="btn btn-secondary">Login</Link>
+
+                    <Link to='/forget-password' className="btn btn-secondary">Forget Password</Link>
                 </div>
             </div>
         </div>
