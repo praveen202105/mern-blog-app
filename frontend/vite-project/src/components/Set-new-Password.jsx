@@ -1,9 +1,11 @@
 import React, { useState,useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 const SetNewPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [token, setToken] = useState('');
+  const navigate =useNavigate();
 
   useEffect(() => {
     // Extract token parameter from the URL
@@ -29,9 +31,12 @@ const SetNewPassword = () => {
   
       if (response.status === 200) {
         console.log('Password updated successfully');
+        alert("Password updated successfully");
+        navigate('/post');
         // Optionally, redirect to login page or display a success message
       } else {
         console.error('Failed to update password');
+        alert("failed to update password")
         // Optionally, display an error message
       }
     } catch (error) {

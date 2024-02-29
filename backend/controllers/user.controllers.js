@@ -1,11 +1,11 @@
 import { config } from 'dotenv';
 config();
 
+import Razorpay from "razorpay"
 import User from "../models/user.models.js";
 import AppError from "../utils/AppError.js";
 import asyncHandler from "../middlewares/asyncHandler.middleware.js";
 import crypto from "crypto"
-import Razorpay from "razorpay"
 
 import nodemailer from "nodemailer"; // Importing nodemailer for sending emails
 
@@ -258,15 +258,17 @@ export const payment = asyncHandler(async(req,res,next) => {
       return res.status(500).json({ error: 'Something went wrong!' });
     }
   // Extract payment ID and order ID from the response
-  const razorpay_payment_id = order.id;
+  const OrderId = order.id;
 
 
-     const generated_signature = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET_KEY)
-                                    .update(razorpay_payment_id)
-                                   .digest('hex');
+      const generated_signature = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET_KEY)
+                                    .update(OrderId)
+                                  .digest('hex');
 
-  res.status(200).json({
-    razorpay_payment_id,
+
+                      console.log(generated_signature)
+  return res.status(200).json({
+    OrderId,
     razorpay_signature:generated_signature
 
   });   
@@ -279,20 +281,28 @@ export const payment = asyncHandler(async(req,res,next) => {
 
 
 export const verifypayment = asyncHandler(async(req,res,next) => {
-  
-    const { razorpay_payment_id,razorpay_signature } = req.body;
+  // console.log(req.body)
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body.response;
+  // console.log(req )
+  try {
+    // Verify the payment signature
+    const text = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const generatedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET_KEY)
+                                     .update(text)
+                                     .digest('hex');
 
-  // Verify the signature to ensure payment authenticity
-  const generated_signature = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET_KEY)
-  .update(razorpay_payment_id)
- .digest('hex');
-
-  if (generated_signature === razorpay_signature) {
-    // Payment verified successfully
-    // Update user status or perform other actions as needed
-    res.status(200).json({ message: 'Payment successful!' });
-  } else {
-    res.status(400).json({ error: 'Payment verification failed!' });
+    if (generatedSignature === razorpay_signature) {
+      // Payment verified successfully
+      // Update user status or perform other actions as needed
+      console.log("verified payment")
+      return res.json({ message: 'Payment verified successfully' });
+    } else {
+      // Invalid signature
+      return res.status(400).json({ error: 'Invalid payment signature' });
+    }
+  } catch (error) {
+    console.error('Error verifying payment:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 }
 );
